@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  username           String    @unique
+  password           String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  OwnedMeetings      Meeting[] @relation("Owner")
+  SubscribedMeetings Meeting[]
+}
+
+model Meeting {
+  id          String   @id @default(cuid())
+  name        String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Subscribers User[] //! owner is also a participant
+  Owner       User     @relation(fields: [ownerId], references: [id], name: "Owner")
+  ownerId     String
+  // TODO: add guest list or just don't care? 旁聽 list?
+  // TODO: Message
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  // TODO add reference
+  // TODO if author is guest then?
+  // TODO show last 10 messages(save memory) or save all of the messages(teacher or ta can review it) when in meeting?
+}
